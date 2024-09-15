@@ -7,6 +7,7 @@ interface MessageFormProps {
 export default function MessageForm({ onSendMessage }: MessageFormProps) {
   const [input, setInput] = useState('');
   const [isFocused, setIsFocused] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
   const paragraphRef = useRef<HTMLParagraphElement | null>(null);
 
   useEffect(() => {
@@ -21,31 +22,48 @@ export default function MessageForm({ onSendMessage }: MessageFormProps) {
     }
   }, [input]);
 
+  const handleChange = useCallback(() => {
+    if (isComposing) return;
+
+    const textArea = paragraphRef.current;
+    if (textArea) {
+      setInput(textArea.innerHTML);
+    }
+  }, [isComposing]);
+
   const handleSubmit = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      onSendMessage(input);
+      handleChange();
+
+      const textArea = paragraphRef.current;
+      if (textArea) {
+        const content = textArea.innerHTML.trim();
+        if (content) {
+          onSendMessage(content);
+        }
+      }
 
       if (paragraphRef.current) {
         paragraphRef.current.innerHTML = '';
       }
       setInput('');
     },
-    [input, onSendMessage],
+    [onSendMessage, handleChange],
   );
-
-  const handleChange = useCallback(() => {
-    const textArea = paragraphRef.current;
-    if (textArea) {
-      setInput(textArea.innerHTML);
-    }
-  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLParagraphElement>) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
         e.preventDefault();
-        onSendMessage(input);
+
+        const textArea = paragraphRef.current;
+        if (textArea) {
+          const content = textArea.innerHTML.trim();
+          if (content) {
+            onSendMessage(content);
+          }
+        }
 
         if (paragraphRef.current) {
           paragraphRef.current.innerHTML = '';
@@ -54,13 +72,19 @@ export default function MessageForm({ onSendMessage }: MessageFormProps) {
         paragraphRef.current?.blur();
       }
     },
-    [input, onSendMessage],
+    [onSendMessage, isComposing],
   );
+
+  const handleCompositionStart = () => setIsComposing(true);
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+    handleChange();
+  };
 
   const handleFocus = () => setIsFocused(true);
   const handleBlur = () => setIsFocused(false);
 
-  const isButtonDisabled = input.trim() === '';
+  const isButtonDisabled = input.trim() === '' && !isComposing;
 
   return (
     <form onSubmit={handleSubmit} className='flex px-4 pb-4'>
@@ -73,6 +97,8 @@ export default function MessageForm({ onSendMessage }: MessageFormProps) {
           onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
           className='max-h-[150px] w-full overflow-y-auto rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
         />
         {!isFocused && !input && (
