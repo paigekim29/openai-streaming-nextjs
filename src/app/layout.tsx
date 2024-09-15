@@ -1,5 +1,8 @@
-import type { Metadata } from 'next';
+import DefaultLayout from '@/components/layout/DefaultLayout';
+
 import './globals.css';
+
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Frontend Chat Application',
@@ -13,7 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body>{children}</body>
+      <body>
+        <DefaultLayout>{children}</DefaultLayout>
+      </body>
     </html>
   );
 }
