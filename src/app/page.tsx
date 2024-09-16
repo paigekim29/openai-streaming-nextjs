@@ -17,11 +17,10 @@ export default function MessageList() {
 
   const handleSendMessage = async (message: string) => {
     setMessages((prevMessages) => [...prevMessages, { isUser: true, text: message }]);
-    scrollToBottom();
 
     try {
       const reader = await sendMessageToAPI(message);
-      await processStream(reader, setMessages, scrollToBottom);
+      await processStream(reader, setMessages);
     } catch (error) {
       console.error('Failed to send message:', error);
       alert(`Error: ${error}`);
@@ -30,7 +29,7 @@ export default function MessageList() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, scrollToBottom]);
+  }, [messages]);
 
   return (
     <div className='flex flex-1 flex-col'>

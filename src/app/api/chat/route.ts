@@ -23,7 +23,7 @@ async function* makeIterator(stream: AsyncIterable<any>) {
 
   for await (const chunk of stream) {
     const delta = chunk.choices[0]?.delta?.content || '';
-    yield encoder.encode(JSON.stringify({ response_chunk: delta }));
+    yield encoder.encode(delta);
   }
 }
 
