@@ -1,9 +1,8 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import LeftMessage from '@/components/message/LeftMessage';
-import RightMessage from '@/components/message/RightMessage';
 import MessageForm from '@/components/message/MessageForm';
+import MessageComponent from '@/components/message/MessageComponent';
 import { useScrollToBottom } from '@/hooks/useScrollToBottom';
 import { sendMessageToAPI } from '@/utils/api';
 import { processStream } from '@/utils/streamProcessor';
@@ -34,13 +33,14 @@ export default function MessageList() {
   return (
     <div className='flex flex-1 flex-col'>
       <div ref={messageListRef} className='flex-1 overflow-auto p-4'>
-        {messages.map((message, index) =>
-          message.isUser ? (
-            <RightMessage key={index} text={message.text} isLast={messages.length === index + 1} />
-          ) : (
-            <LeftMessage key={index} text={message.text} isLast={messages.length === index + 1} />
-          ),
-        )}
+        {messages.map((message, index) => (
+          <MessageComponent
+            key={index}
+            text={message.text}
+            isLast={messages.length === index + 1}
+            isUser={message.isUser}
+          />
+        ))}
       </div>
       <MessageForm onSendMessage={handleSendMessage} />
     </div>

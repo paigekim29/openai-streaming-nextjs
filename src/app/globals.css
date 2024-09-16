@@ -4,10 +4,85 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  word-wrap: break-word;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+h1 {
+  font-size: 2.25rem;
+  line-height: 1.4;
+}
+
+h2 {
+  font-size: 1.875rem;
+  line-height: 1.4;
+}
+
+h3 {
+  font-size: 1.5rem;
+  line-height: 1.4;
+}
+
+h4 {
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+h5 {
+  font-size: 1.125rem;
+  line-height: 1.4;
+}
+
+h6 {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+  line-height: 1.6;
+}
+
+ul {
+  list-style: disc;
+}
+
+ol {
+  list-style: decimal;
+}
+
+li {
+  margin-bottom: 0.25rem;
+  line-height: 1.6;
+}
+
+pre {
+  width: 100%;
+  white-space: pre-wrap;
+}
+
+code {
+  background-color: black;
+  color: white;
+  padding: 0.1rem 0.25rem;
+  border-radius: 0.25rem;
+  line-height: 1.5;
+  display: block;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+  line-height: 1.6;
+}
+
+a:hover {
+  color: darkblue;
+}
+
+blockquote {
+  border-left: 4px solid white;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  line-height: 1.6;
 }
