@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  project: process.env.OPENAI_PROJECT_ID
 });
 
 function iteratorToStream(iterator: AsyncIterableIterator<Uint8Array>) {

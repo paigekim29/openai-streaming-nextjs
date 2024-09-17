@@ -3,26 +3,34 @@
 import { useRef, useState, useEffect } from 'react';
 import MessageForm from '@/components/message/MessageForm';
 import MessageComponent from '@/components/message/MessageComponent';
-import { useScrollToBottom } from '@/hooks/useScrollToBottom';
-import { sendMessageToAPI } from '@/utils/api';
-import { processStream } from '@/utils/streamProcessor';
+import useScrollToBottom from '@/hooks/useScrollToBottom';
+import fetchChatStream from '@/utils/fetchChatStream';
+import processStream from '@/utils/processStream';
 
 import { Message } from '@/types/message';
 
 export default function MessageList() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollToBottom = useScrollToBottom(messageListRef);
 
-  const handleSendMessage = async (message: string) => {
-    setMessages((prevMessages) => [...prevMessages, { isUser: true, text: message }]);
+  const handleSendMessage = async (type: string, message?: string) => {
+    if (type === 'submit' && message) {
+      setMessages((prevMessages) => [...prevMessages, { isUser: true, text: message }]);
+      setIsSubmitting(true);
 
-    try {
-      const reader = await sendMessageToAPI(message);
-      await processStream(reader, setMessages);
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      alert(`Error: ${error}`);
+      try {
+        const reader = await fetchChatStream(message);
+        await processStream(reader, setMessages);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        alert(`Error: ${error}`);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      // TODO cancel submission
     }
   };
 
@@ -42,7 +50,7 @@ export default function MessageList() {
           />
         ))}
       </div>
-      <MessageForm onSendMessage={handleSendMessage} />
+      <MessageForm onSendMessage={handleSendMessage} isSubmitting={isSubmitting} />
     </div>
   );
 }

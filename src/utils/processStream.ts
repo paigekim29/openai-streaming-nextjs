@@ -1,6 +1,6 @@
 import { Message } from "@/types/message";
 
-export async function processStream(
+export default async function processStream(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>
 ) {
@@ -15,7 +15,7 @@ export async function processStream(
 
     const chunk = decoder.decode(value, { stream: true });
     accumulatedText += chunk;
-    
+
     setMessages((prevMessages: Message[]) => {
       const newMessages = [...prevMessages];
       newMessages[newMessages.length - 1] = { isUser: false, text: accumulatedText };

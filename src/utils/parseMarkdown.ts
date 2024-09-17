@@ -1,4 +1,4 @@
-export function parseMarkdown(markdown: string) {
+export default function parseMarkdown(markdown: string) {
   // Headings
   markdown = markdown.replace(/^###### (.*?)$/gm, '<h6>$1</h6>');
   markdown = markdown.replace(/^##### (.*?)$/gm, '<h5>$1</h5>');
@@ -14,7 +14,10 @@ export function parseMarkdown(markdown: string) {
   markdown = markdown.replace(/\*(.*?)\*/gim, '<em>$1</em>');
 
   // Code blocks
-  markdown = markdown.replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>');
+  markdown = markdown.replace(/```([\s\S]*?)```/gim, '<code>$1</code>');
+
+  // inline
+  markdown = markdown.replace(/`([\s\S]*?)`/gim, '<code>$1</code>');
 
   // Links
   markdown = markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>');
@@ -28,19 +31,11 @@ export function parseMarkdown(markdown: string) {
   markdown = markdown.replace(/(<li>.*<\/li>\s*)+/gim, '<ul>$&</ul>');
   markdown = markdown.replace(/<\/ul>\s*<ul>/gim, '');
 
-  // Handle ordered lists
-  markdown = markdown.replace(/^\d+\. (.*)$/gm, '<li>$1</li>');
-  markdown = markdown.replace(/(<li>.*<\/li>\s*)+/gim, '<ol>$&</ol>');
-  markdown = markdown.replace(/<\/ol>\s*<ol>/gim, '');
-
   // Horizontal rules
   markdown = markdown.replace(/^---$/gm, '<hr>');
 
   // Blockquotes
   markdown = markdown.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>');
-
-  // Line breaks
-  markdown = markdown.replace(/\n{2,}/gim, '<br>');
 
   return markdown;
 };

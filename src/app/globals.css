@@ -56,11 +56,6 @@ li {
   line-height: 1.6;
 }
 
-pre {
-  width: 100%;
-  white-space: pre-wrap;
-}
-
 code {
   background-color: black;
   color: white;

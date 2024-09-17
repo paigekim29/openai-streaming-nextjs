@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-export function useScrollToBottom(ref: React.RefObject<HTMLDivElement>) {
+export default function useScrollToBottom(ref: React.RefObject<HTMLDivElement>) {
   const scrollToBottom = useCallback(() => {
     const element = ref.current;
     if (element) {
