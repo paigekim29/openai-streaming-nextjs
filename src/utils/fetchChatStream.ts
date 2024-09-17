@@ -1,8 +1,11 @@
-export default async function sendMessageToAPI(message: string) {
+export default async function sendMessageToAPI(message: string, controller: AbortController) {
+  const {signal} = controller;
+
   const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message }),
+    signal
   });
 
   if (!response.ok) {

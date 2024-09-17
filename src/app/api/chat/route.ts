@@ -1,11 +1,13 @@
 import OpenAI from 'openai';
 
+import { Stream } from 'openai/streaming';
+
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   project: process.env.OPENAI_PROJECT_ID
 });
 
-function iteratorToStream(iterator: AsyncIterableIterator<Uint8Array>) {
+function iteratorToStream(iterator: AsyncGenerator<Uint8Array>) {
   return new ReadableStream({
     async pull(controller) {
       const { value, done } = await iterator.next();
@@ -19,7 +21,7 @@ function iteratorToStream(iterator: AsyncIterableIterator<Uint8Array>) {
   });
 }
 
-async function* makeIterator(stream: AsyncIterable<any>) {
+async function* makeIterator(stream: Stream<OpenAI.Chat.Completions.ChatCompletionChunk>) {
   const encoder = new TextEncoder();
 
   for await (const chunk of stream) {
@@ -36,6 +38,7 @@ export async function POST(req: Request) {
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: message }],
       stream: true,
+      stream_options: { include_usage: true }
     });
 
     return new Response(iteratorToStream(makeIterator(stream)));

@@ -14,23 +14,31 @@ export default function MessageList() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const scrollToBottom = useScrollToBottom(messageListRef);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleSendMessage = async (type: string, message?: string) => {
     if (type === 'submit' && message) {
       setMessages((prevMessages) => [...prevMessages, { isUser: true, text: message }]);
       setIsSubmitting(true);
 
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
       try {
-        const reader = await fetchChatStream(message);
+        const reader = await fetchChatStream(message, controller);
         await processStream(reader, setMessages);
       } catch (error) {
-        console.error('Failed to send message:', error);
-        alert(`Error: ${error}`);
+        if (error instanceof Error) {
+          if (error.name !== 'AbortError') {
+            console.error('Failed to send message:', error);
+            alert(`Error: ${error}`);
+          }
+        }
       } finally {
         setIsSubmitting(false);
       }
-    } else {
-      // TODO cancel submission
+    } else if (type === 'abort') {
+      abortControllerRef.current?.abort();
     }
   };
 

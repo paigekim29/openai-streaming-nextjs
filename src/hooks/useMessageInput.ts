@@ -25,8 +25,6 @@ export default function useMessageInput(onSendMessage: (type: string, text?: str
       setInput('');
       textAreaRef.current?.blur();
     } else {
-      console.log('cancel submission');
-      // TODO cancel submission
       onSendMessage('abort');
     }
   }, [input, onSendMessage]);
