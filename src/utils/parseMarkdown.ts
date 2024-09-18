@@ -1,4 +1,13 @@
 export default function parseMarkdown(markdown: string) {
+  const codeBlocks: string[] = [];
+
+  // Escape HTML tags to prevent rendering
+  markdown = markdown.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  markdown = markdown.replace(/```([\s\S]*?)```/gim, (match, p1) => {
+    codeBlocks.push(match);
+    return `CODEBLOCK${codeBlocks.length - 1}CODEBLOCK`;
+  });
+
   // Headings
   markdown = markdown.replace(/^###### (.*?)$/gm, '<h6>$1</h6>');
   markdown = markdown.replace(/^##### (.*?)$/gm, '<h5>$1</h5>');
@@ -13,11 +22,10 @@ export default function parseMarkdown(markdown: string) {
   // Italic text
   markdown = markdown.replace(/\*(.*?)\*/gim, '<em>$1</em>');
 
-  // Code blocks
-  markdown = markdown.replace(/```([\s\S]*?)```/gim, '<code>$1</code>');
-
-  // inline
-  markdown = markdown.replace(/`([\s\S]*?)`/gim, '<code>$1</code>');
+  // Inline code (keep the backticks visible)
+  markdown = markdown.replace(/`([\s\S]*?)`/gim, (match, p1) => {
+    return `<code>&#96;${p1}&#96;</code>`;
+  });
 
   // Links
   markdown = markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2">$1</a>');
@@ -26,7 +34,6 @@ export default function parseMarkdown(markdown: string) {
   markdown = markdown.replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, '<img src="$2" alt="$1">');
 
   // Lists
-  // Handle unordered lists
   markdown = markdown.replace(/(?:^\* (.*$)|^\- (.*$))/gim, '<li>$1$2</li>');
   markdown = markdown.replace(/(<li>.*<\/li>\s*)+/gim, '<ul>$&</ul>');
   markdown = markdown.replace(/<\/ul>\s*<ul>/gim, '');
@@ -37,5 +44,10 @@ export default function parseMarkdown(markdown: string) {
   // Blockquotes
   markdown = markdown.replace(/^> (.*)$/gm, '<blockquote>$1</blockquote>');
 
+  // Restore code blocks with original content
+  markdown = markdown.replace(/CODEBLOCK(\d+)CODEBLOCK/gim, (match, p1) => {
+    return `<pre><code>${codeBlocks[parseInt(p1)].replace(/```/g, '')}</code></pre>`;
+  });
+
   return markdown;
-};
+}
