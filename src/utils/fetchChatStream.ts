@@ -1,21 +1,18 @@
-export default async function sendMessageToAPI(message: string, controller: AbortController) {
-  const {signal} = controller;
+import { Message } from "@/types/message";
+import { AssistantStream } from "openai/lib/AssistantStream";
 
-  const response = await fetch('/api/chat', {
+export default async function fetchChatStream(message: string, messages: Message[], controller: AbortController, assistantId: string, threadId: string) {
+  const { signal } = controller;
+
+  const response = await fetch(`/api/thread/${threadId}/message`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({
+      content: message,
+      assistantId
+    }),
     signal
   });
 
-  if (!response.ok) {
-    throw new Error(`HTTP error: ${response.status}`);
-  }
-
-  const reader = response.body?.getReader();
-  if (!reader) {
-    throw new Error('Failed to get reader from response body');
-  }
-
-  return reader;
+  return response.body ? AssistantStream.fromReadableStream(response.body) : null;
 }

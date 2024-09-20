@@ -1,25 +1,34 @@
 import { Message } from "@/types/message";
 
+import { AssistantStream } from "openai/lib/AssistantStream";
+
 export default async function processStream(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  reader: AssistantStream,
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
+  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  const decoder = new TextDecoder();
-  let accumulatedText = '';
+  reader.on("textCreated", () => {
+    setMessages((prevMessages: Message[]) => [...prevMessages, { role: "assistant", text: "" }]);
+  });
+  reader.on("textDelta", (delta) => {
+    const { value } = delta;
 
-  setMessages((prevMessages: Message[]) => [...prevMessages, { isUser: false, text: '...' }]);
+    if (value != null) {
+      setMessages((prevMessages) => {
+        const lastMessage = prevMessages[prevMessages.length - 1];
+        const updatedLastMessage = {
+          ...lastMessage,
+          text: lastMessage.text + value,
+        };
+        return [...prevMessages.slice(0, -1), updatedLastMessage];
+      });
+    };
+  });
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    const chunk = decoder.decode(value, { stream: true });
-    accumulatedText += chunk;
-
-    setMessages((prevMessages: Message[]) => {
-      const newMessages = [...prevMessages];
-      newMessages[newMessages.length - 1] = { isUser: false, text: accumulatedText };
-      return newMessages;
-    });
-  }
+  reader.on("event", (event) => {
+    if (event.event === "thread.run.completed") {
+      console.log('thread.run.completed')
+      setIsSubmitting(false)
+    };
+  });
 }

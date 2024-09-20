@@ -1,11 +1,7 @@
+import { openai } from '@/app/openai';
+
 import OpenAI from 'openai';
-
 import { Stream } from 'openai/streaming';
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  project: process.env.OPENAI_PROJECT_ID
-});
 
 function iteratorToStream(iterator: AsyncGenerator<Uint8Array>) {
   return new ReadableStream({
@@ -34,7 +30,7 @@ export async function POST(req: Request) {
   const { message } = await req.json();
 
   try {
-    const stream = await client.chat.completions.create({
+    const stream = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: message }],
       stream: true,
