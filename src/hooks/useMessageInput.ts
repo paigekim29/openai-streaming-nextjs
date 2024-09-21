@@ -26,15 +26,11 @@ export default function useMessageInput(
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   }, []);
-
-  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  
+  const handleFormSubmission = useCallback((type: string) => {
     if (input.trim()) {
-      onSendMessage('submit', input, index);
-      if (index && setIsActive) {
-        setIsActive(false);
-      };
+      onSendMessage(type, input, index);
+      if (index && setIsActive) setIsActive(false);
       setInput('');
       textAreaRef.current?.blur();
     } else {
@@ -42,20 +38,17 @@ export default function useMessageInput(
     }
   }, [input, onSendMessage]);
 
+  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleFormSubmission('submit');
+  }, [handleFormSubmission]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
       e.preventDefault();
-
-      if (input.trim()) {
-        onSendMessage('submit', input, index);
-
-        if (index && setIsActive) setIsActive(false);
-
-        setInput('');
-        textAreaRef.current?.blur();
-      }
+      handleFormSubmission('submit');
     }
-  }, [input, isComposing, onSendMessage]);
+  }, [isComposing, handleFormSubmission]);
 
   const handleCompositionStart = useCallback(() => setIsComposing(true), []);
   const handleCompositionEnd = useCallback(() => setIsComposing(false), []);

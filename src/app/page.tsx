@@ -21,67 +21,56 @@ export default function MessageList() {
 
   const scrollToBottom = useScrollToBottom(messageListRef);
 
+  const handleMessageSubmission = async (message: string, isEdit: boolean, index?: number) => {
+    setIsSubmitting(true);
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    const { assistantId, threadId } = openAiInfo;
+    const messageId = index !== undefined ? messages[index]?.id : undefined;
+
+    try {
+      const response = await fetchChatStream(message, controller, assistantId, threadId, messageId);
+
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages];
+        if (isEdit && index !== undefined) {
+          updatedMessages[index] = { ...updatedMessages[index], id: response.id };
+        }
+
+        const lastMessage = prevMessages[prevMessages.length - 1];
+        updatedMessages[prevMessages.length - 1] = { ...lastMessage, id: response.id };
+
+        return updatedMessages;
+      });
+
+      await processStream(response, setMessages, setIsSubmitting);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name !== 'AbortError') {
+          setIsSubmitting(false);
+          console.error('Failed to send message:', error);
+          alert(`Error: ${error}`);
+        }
+      }
+    }
+  };
+
   const handleSendMessage = async (type: string, message?: string, index?: number) => {
-    const isEdit = index && !isNaN(index);
+    const isEdit = index !== undefined && !isNaN(index);
+
     if (type === 'submit' && message) {
-      if (isEdit) {
-        setMessages((prevMessages) => {
-          const updatedMessage = {
-            ...prevMessages[index],
-            text: message,
-          };
-
-          const updatedMessages = [...prevMessages, { id: uuidv4(), role: 'user', text: message }];
-          updatedMessages[index] = updatedMessage;
-
-          return updatedMessages;
-        });
-      } else {
-        setMessages((prevMessages) => [...prevMessages, { id: uuidv4(), role: 'user', text: message }]);
-      }
-      setIsSubmitting(true);
-
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      const { assistantId, threadId } = openAiInfo;
-      try {
-        const messageId = messages.find((_, i) => i === index)?.id;
-        const response = await fetchChatStream(message, controller, assistantId, threadId, messageId);
-
+      setMessages((prevMessages) => {
+        const updatedMessages = [...prevMessages, { id: uuidv4(), role: 'user', text: message }];
         if (isEdit) {
-          setMessages((prevMessages) => {
-            const editedMessage = {
-              ...prevMessages[index],
-              id: response.id,
-            };
-
-            const updatedMessages = [...prevMessages];
-            updatedMessages[index] = editedMessage;
-
-            return updatedMessages;
-          });
+          updatedMessages[index] = { ...updatedMessages[index], text: message };
         }
 
-        setMessages((prevMessages) => {
-          const lastMessage = prevMessages[prevMessages.length - 1];
-          const updatedLastMessage = {
-            ...lastMessage,
-            id: response.id,
-          };
-          return [...prevMessages.slice(0, -1), updatedLastMessage];
-        });
+        return updatedMessages;
+      });
 
-        await processStream(response, setMessages, setIsSubmitting);
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.name !== 'AbortError') {
-            setIsSubmitting(false);
-            console.error('Failed to send message:', error);
-            alert(`Error: ${error}`);
-          }
-        }
-      }
+      await handleMessageSubmission(message, isEdit, index);
     } else if (type === 'abort') {
       setIsSubmitting(false);
       abortControllerRef.current?.abort();
@@ -97,12 +86,11 @@ export default function MessageList() {
       const assistantData = await createAssistant();
       const threadData = await createThread();
 
-      if (assistantData?.assistantId) {
-        setOpenAiInfo((prev) => ({ ...prev, assistantId: assistantData.assistantId }));
-      }
-
-      if (threadData?.threadId) {
-        setOpenAiInfo((prev) => ({ ...prev, threadId: threadData.threadId }));
+      if (assistantData && threadData) {
+        setOpenAiInfo({
+          assistantId: assistantData.assistantId,
+          threadId: threadData.threadId,
+        });
       }
     };
 
