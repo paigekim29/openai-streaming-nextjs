@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import MessageForm from '@/components/message/MessageForm';
 import MessageComponent from '@/components/message/MessageComponent';
 import useScrollToBottom from '@/hooks/useScrollToBottom';
@@ -20,9 +21,24 @@ export default function MessageList() {
 
   const scrollToBottom = useScrollToBottom(messageListRef);
 
-  const handleSendMessage = async (type: string, message?: string) => {
+  const handleSendMessage = async (type: string, message?: string, index?: number) => {
+    const isEdit = index && !isNaN(index);
     if (type === 'submit' && message) {
-      setMessages((prevMessages) => [...prevMessages, { role: 'user', text: message }]);
+      if (isEdit) {
+        setMessages((prevMessages) => {
+          const updatedMessage = {
+            ...prevMessages[index],
+            text: message,
+          };
+
+          const updatedMessages = [...prevMessages, { id: uuidv4(), role: 'user', text: message }];
+          updatedMessages[index] = updatedMessage;
+
+          return updatedMessages;
+        });
+      } else {
+        setMessages((prevMessages) => [...prevMessages, { id: uuidv4(), role: 'user', text: message }]);
+      }
       setIsSubmitting(true);
 
       const controller = new AbortController();
@@ -30,8 +46,33 @@ export default function MessageList() {
 
       const { assistantId, threadId } = openAiInfo;
       try {
-        const reader = await fetchChatStream(message, messages, controller, assistantId, threadId);
-        reader && (await processStream(reader, setMessages, setIsSubmitting));
+        const messageId = messages.find((_, i) => i === index)?.id;
+        const response = await fetchChatStream(message, controller, assistantId, threadId, messageId);
+
+        if (isEdit) {
+          setMessages((prevMessages) => {
+            const editedMessage = {
+              ...prevMessages[index],
+              id: response.id,
+            };
+
+            const updatedMessages = [...prevMessages];
+            updatedMessages[index] = editedMessage;
+
+            return updatedMessages;
+          });
+        }
+
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          const updatedLastMessage = {
+            ...lastMessage,
+            id: response.id,
+          };
+          return [...prevMessages.slice(0, -1), updatedLastMessage];
+        });
+
+        await processStream(response, setMessages, setIsSubmitting);
       } catch (error) {
         if (error instanceof Error) {
           if (error.name !== 'AbortError') {
@@ -42,6 +83,7 @@ export default function MessageList() {
         }
       }
     } else if (type === 'abort') {
+      setIsSubmitting(false);
       abortControllerRef.current?.abort();
     }
   };
@@ -73,9 +115,12 @@ export default function MessageList() {
         {messages.map((message, index) => (
           <MessageComponent
             key={index}
+            index={index}
             text={message.text}
             isLast={messages.length === index + 1}
             isUser={message.role === 'user'}
+            isSubmitting={isSubmitting}
+            onSendMessage={handleSendMessage}
           />
         ))}
       </div>

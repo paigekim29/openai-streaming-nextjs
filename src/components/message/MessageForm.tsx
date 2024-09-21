@@ -3,9 +3,18 @@ import useMessageInput from '@/hooks/useMessageInput';
 interface MessageFormProps {
   onSendMessage: (text: string) => Promise<void>;
   isSubmitting: boolean;
+  defaultValue?: string;
+  index?: number;
+  setIsActive?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function MessageForm({ onSendMessage, isSubmitting }: MessageFormProps) {
+export default function MessageForm({
+  onSendMessage,
+  isSubmitting,
+  defaultValue,
+  index,
+  setIsActive,
+}: MessageFormProps) {
   const {
     input,
     textAreaRef,
@@ -14,10 +23,10 @@ export default function MessageForm({ onSendMessage, isSubmitting }: MessageForm
     handleKeyDown,
     handleCompositionStart,
     handleCompositionEnd,
-  } = useMessageInput(onSendMessage);
+  } = useMessageInput(onSendMessage, setIsActive, defaultValue, index);
 
   return (
-    <form onSubmit={handleSubmit} className='flex px-4 pb-4'>
+    <form onSubmit={handleSubmit} className='flex w-full px-4 pb-4'>
       <div className='relative flex w-full items-end'>
         <textarea
           ref={textAreaRef}

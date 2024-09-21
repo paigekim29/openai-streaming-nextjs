@@ -1,34 +1,43 @@
-import { Message } from "@/types/message";
+import { v4 as uuidv4 } from 'uuid';
 
-import { AssistantStream } from "openai/lib/AssistantStream";
+import { Message } from "@/types/message";
+import { ChatStreamResponse } from "@/types/chat";
 
 export default async function processStream(
-  reader: AssistantStream,
+  response: ChatStreamResponse | null,
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>,
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>
 ) {
-  reader.on("textCreated", () => {
-    setMessages((prevMessages: Message[]) => [...prevMessages, { role: "assistant", text: "" }]);
-  });
-  reader.on("textDelta", (delta) => {
-    const { value } = delta;
+  const reader = response?.stream;
 
-    if (value != null) {
-      setMessages((prevMessages) => {
-        const lastMessage = prevMessages[prevMessages.length - 1];
-        const updatedLastMessage = {
-          ...lastMessage,
-          text: lastMessage.text + value,
-        };
-        return [...prevMessages.slice(0, -1), updatedLastMessage];
-      });
-    };
-  });
+  if (reader) {
+    reader.on("textCreated", () => {
+      setMessages((prevMessages: Message[]) => [...prevMessages, {
+        id: uuidv4(),
+        role: "assistant",
+        text: ""
+      }]);
+    });
+    reader.on("textDelta", (delta) => {
+      const { value } = delta;
 
-  reader.on("event", (event) => {
-    if (event.event === "thread.run.completed") {
-      console.log('thread.run.completed')
-      setIsSubmitting(false)
-    };
-  });
+      if (value != null) {
+        setMessages((prevMessages) => {
+          const lastMessage = prevMessages[prevMessages.length - 1];
+          const updatedLastMessage = {
+            ...lastMessage,
+            text: lastMessage.text + value,
+          };
+          return [...prevMessages.slice(0, -1), updatedLastMessage];
+        });
+      };
+    });
+
+    reader.on("event", (event) => {
+      if (event.event === "thread.run.completed") {
+        setIsSubmitting(false)
+      };
+    });
+  }
+
 }

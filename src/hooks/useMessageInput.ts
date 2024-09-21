@@ -1,9 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
-export default function useMessageInput(onSendMessage: (type: string, text?: string) => Promise<void>) {
+export default function useMessageInput(
+  onSendMessage: (type: string, text?: string, index?: number)
+    => Promise<void>,
+  setIsActive?: React.Dispatch<React.SetStateAction<boolean>>,
+  defaultValue?: string,
+  index?: number,
+) {
   const [isComposing, setIsComposing] = useState(false);
   const [input, setInput] = useState<string>('');
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    defaultValue && setInput(defaultValue);
+  }, [defaultValue])
 
   useEffect(() => {
     const textArea = textAreaRef.current;
@@ -21,7 +31,10 @@ export default function useMessageInput(onSendMessage: (type: string, text?: str
     e.preventDefault();
 
     if (input.trim()) {
-      onSendMessage('submit', input);
+      onSendMessage('submit', input, index);
+      if (index && setIsActive) {
+        setIsActive(false);
+      };
       setInput('');
       textAreaRef.current?.blur();
     } else {
@@ -34,7 +47,10 @@ export default function useMessageInput(onSendMessage: (type: string, text?: str
       e.preventDefault();
 
       if (input.trim()) {
-        onSendMessage('submit', input);
+        onSendMessage('submit', input, index);
+
+        if (index && setIsActive) setIsActive(false);
+
         setInput('');
         textAreaRef.current?.blur();
       }
