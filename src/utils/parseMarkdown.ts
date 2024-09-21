@@ -22,9 +22,9 @@ export default function parseMarkdown(markdown: string) {
   // Italic text
   markdown = markdown.replace(/\*(.*?)\*/gim, '<em>$1</em>');
 
-  // Inline code (keep the backticks visible)
+  // Inline code
   markdown = markdown.replace(/`([\s\S]*?)`/gim, (match, p1) => {
-    return `<code>&#96;${p1}&#96;</code>`;
+    return `<code>${p1}</code>`;
   });
 
   // Links
