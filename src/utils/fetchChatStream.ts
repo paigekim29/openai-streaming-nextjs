@@ -1,10 +1,11 @@
 import { ChatStreamResponse } from "@/types/chat";
 import { AssistantStream } from "openai/lib/AssistantStream";
 
-export default async function fetchChatStream(message: string,
+export default async function fetchChatStream(
+  message: string,
   controller: AbortController,
   assistantId: string,
-  threadId: string,
+  threadId?: string,
   messageId?: string
 ): Promise<ChatStreamResponse> {
   const { signal } = controller;

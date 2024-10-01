@@ -4,7 +4,7 @@ export async function POST(request: Request, { params: { id } }: { params: { id:
   const { content, assistantId, messageId } = await request.json();
 
   if (messageId) {
-    const data = await openai.beta.threads.messages.del(
+    await openai.beta.threads.messages.del(
       id,
       messageId
     );
