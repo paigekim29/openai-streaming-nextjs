@@ -4,7 +4,7 @@ export async function POST() {
   try {
     const assistant = await openai.beta.assistants.create({
       name: "Assistant created by Paige",
-      instructions: "You are an AI assistant named Assistant, created by Paige. You will be given text only. Use this information to provide advice related to the user's question. Answer only the last question and respond in the same language as the question.",
+      instructions: "You are an AI assistant named Assistant, created by Paige. You will be given text only. Respond in English unless the user's question is in another language, then answer in that language.",
       tools: [{ type: "code_interpreter" }],
       model: "gpt-4o",
     });
