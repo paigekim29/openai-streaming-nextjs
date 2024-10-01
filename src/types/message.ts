@@ -3,3 +3,9 @@ export interface Message {
   role: string;
   text: string;
 }
+
+export interface ThreadMessages {
+  id: string;
+  messages: Message[];
+  isSubmitting: boolean;
+}
