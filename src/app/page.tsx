@@ -37,10 +37,13 @@ export default function MessageList() {
     );
   };
 
-  const handleThreadOrderChange = (threadId: string, newOrder: number) => {
-    setThreadsMessages((prevThreads) =>
-      prevThreads.map((thread) => (thread.id === threadId ? { ...thread, currentThreadOrder: newOrder } : thread)),
-    );
+  const handleThreadOrderChange = (threadId: string, newOrder: number, index: number) => {
+    setThreadsMessages((prevThreads) => prevThreads.map((thread) => {
+        if(thread.id === threadId) {
+          return { ...thread, currentThreadOrder: (newOrder - 1 === (thread.messages[index]?.nextThread ?? []).length) ? 1 : newOrder };
+        } else return thread;
+      })
+    )
   };
 
   useEffect(() => {

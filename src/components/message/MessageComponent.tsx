@@ -16,7 +16,7 @@ interface MessageComponentProps {
   selectedThreadId: string;
   setSelectedThreadId: React.Dispatch<React.SetStateAction<string>>;
   currentThreadOrder: number;
-  onThreadOrderChange: (threadId: string, newOrder: number) => void;
+  onThreadOrderChange: (threadId: string, newOrder: number, index: number) => void;
 }
 
 export default function MessageComponent({
@@ -39,7 +39,7 @@ export default function MessageComponent({
   const [isActive, setIsActive] = useState(false);
 
   const handleThreadOrderChange = (newOrder: number) => {
-    onThreadOrderChange(selectedThreadId, newOrder);
+    onThreadOrderChange(selectedThreadId, newOrder, index);
     setSelectedThreadId(newOrder === 1 ? selectedThreadId : nextThread[newOrder - 2]);
   };
 
