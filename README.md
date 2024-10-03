@@ -10,6 +10,7 @@ A real-time chat application built with Next.js, React, TypeScript, and OpenAI's
 - **Abort Action**: Abort message submissions mid-way if needed.
 - **Auto Scroll**: Automatically scroll to the latest message.
 - **Clean UI**: User-friendly interface using Tailwind CSS.
+- **Thread Navigation**: Navigate through different threads of conversation.
 
 ## Getting Started
 
