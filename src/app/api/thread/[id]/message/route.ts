@@ -1,14 +1,7 @@
 import { openai } from "@/app/openai";
 
 export async function POST(request: Request, { params: { id } }: { params: { id: string } }) {
-  const { content, assistantId, messageId } = await request.json();
-
-  if (messageId) {
-    await openai.beta.threads.messages.del(
-      id,
-      messageId
-    );
-  }
+  const { content, assistantId } = await request.json();
 
   const response = await openai.beta.threads.messages.create(id, {
     role: "user",

@@ -26,11 +26,13 @@ export default function useMessageInput(
   const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   }, []);
-  
+
   const handleFormSubmission = useCallback((type: string) => {
     if (input.trim()) {
       onSendMessage(type, input, index);
-      if (index && setIsActive) setIsActive(false);
+      if (index !==undefined && !isNaN(index) && setIsActive) {
+        setIsActive(false);
+      }
       setInput('');
       textAreaRef.current?.blur();
     } else {

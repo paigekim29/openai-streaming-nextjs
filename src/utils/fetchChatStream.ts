@@ -6,7 +6,6 @@ export default async function fetchChatStream(
   controller: AbortController,
   assistantId: string,
   threadId?: string,
-  messageId?: string
 ): Promise<ChatStreamResponse> {
   const { signal } = controller;
 
@@ -16,7 +15,6 @@ export default async function fetchChatStream(
     body: JSON.stringify({
       content: message,
       assistantId,
-      messageId
     }),
     signal
   });
