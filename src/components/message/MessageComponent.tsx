@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import DOMPurify from 'dompurify';
+import MessageForm from '@/components/message/MessageForm';
+import ThreadNavigation from '@/components/thread/ThreadNavigation';
 import parseMarkdown from '@/utils/parseMarkdown';
-import MessageForm from './MessageForm';
-import ThreadNavigation from './ThreadNavigation';
 
 import { Message } from '@/types/message';
 

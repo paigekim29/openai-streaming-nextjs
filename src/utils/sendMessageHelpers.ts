@@ -1,6 +1,7 @@
-import { ThreadMessages, Message } from '@/types/message';
 import { v4 as uuidv4 } from 'uuid';
-import { createThread } from '../queries/api';
+import { createThread } from '@/queries/api';
+
+import { ThreadMessages, Message } from '@/types/message';
 
 export function createMessage(text: string): Message {
   return { id: uuidv4(), role: 'user', text, nextThread: [] };

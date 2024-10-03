@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from 'react';
 import MessageForm from '@/components/message/MessageForm';
 import MessageComponent from '@/components/message/MessageComponent';
-import ThreadListSidebar from '@/components/ThreadListSidebar';
+import ThreadListSidebar from '@/components/thread/ThreadListSidebar';
 import useScrollToBottom from '@/hooks/useScrollToBottom';
 import { createAssistant, createThread } from '@/queries/api';
 import sendMessage from '@/utils/sendMessage';
