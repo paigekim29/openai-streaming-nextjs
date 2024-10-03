@@ -5,7 +5,7 @@ import MessageForm from '@/components/message/MessageForm';
 import MessageComponent from '@/components/message/MessageComponent';
 import ThreadListSidebar from '@/components/ThreadListSidebar';
 import useScrollToBottom from '@/hooks/useScrollToBottom';
-import { createAssistant, createThread } from '@/utils/api';
+import { createAssistant, createThread } from '@/queries/api';
 import sendMessage from '@/utils/sendMessage';
 
 import { ThreadMessages } from '@/types/message';
